@@ -1,0 +1,22 @@
+title: "CodingCoach — Socratic coding tutor that never just dumps answers"
+pitch: "An AI coding tutor that reads where you are and asks, hints, or explains — never dumps."
+features:
+  - "classifies every message before responding: exploring, attempting, stuck, or understanding"
+  - "asks questions before explaining — Socratic method, not information dump"
+  - "gives the smallest useful hint when you're stuck"
+  - "checks your code and names what's right before saying what's wrong"
+  - "runs on Amazon Bedrock AgentCore Runtime"
+eager: false
+intro: "CodingCoach is a Socratic coding tutor. Strands Decider reads every message and picks the right teaching move before the LLM responds — ask, hint, or explain."
+turns:
+  - say: "What is recursion?"
+    narrate: "The learner asks about a new concept. Watch the decider classify this as 'exploring' and redirect to a question rather than an explanation."
+  - say: "I think a function calls itself... but I'm not sure what stops it."
+    narrate: "The learner shows partial understanding. The decider sees 'attempting' and asks the tutor to probe the gap."
+  - say: "def factorial(n):\n    return n * factorial(n)"
+    narrate: "The learner shares code with no base case. The decider sees 'attempting' and the tutor checks the answer — naming what is right first."
+  - say: "I still don't get why it needs a stopping point, just explain it please."
+    narrate: "After repeated attempts, the learner asks directly. The decider sees 'stuck' with needs_direct=yes and the tutor finally explains."
+  - say: "Oh! So the base case is like an emergency exit — without it the function calls itself forever."
+    narrate: "The learner demonstrates understanding. The decider catches it and the tutor offers a challenge."
+outro: "Here is what the numbers actually showed. We ran Strands Decider against a standard language model on the same set of decisions. Both got around the same number right — but the decider did it in about one quarter of the time. That matters because this decision runs on every single message a learner sends. The faster it is, the less the learner has to wait before the tutor responds. And at a fraction of the cost, it is practical to run it in production, not just in a demo. The bigger point is this: a language model is a powerful thing, but it does not always need to write a paragraph to answer a question. Sometimes all you need is a label and a confidence score. When that is enough, use something built for exactly that job."

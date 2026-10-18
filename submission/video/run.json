@@ -1,0 +1,117 @@
+[
+ {
+  "start": 5.316439151763916,
+  "end": 59.11462068557739,
+  "out": {
+   "reply": "Great question! **Recursion** is when a function calls itself, but with a simpler version of the problem each time. Think of it like Russian nesting dolls: you open one to find a smaller doll inside, until you reach the tiniest one that doesn't contain anything else.\n\nThe key rule you're learning is the **base case** - that very smallest doll that stops the whole chain from going on forever. In your factorial example, `if n == 0: return 1` is like opening the last tiny doll and saying \"Here's what we were looking for!\" - this gives us an answer so the computer knows when to stop calling itself endlessly.\n\nWould you like me to trace through exactly how `factorial(3)` unfolds with this emergency exit installed?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "exploring",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7333
+    }
+   ],
+   "model_id": "qwen3.5-4b",
+   "latency_ms": 45623,
+   "agent": "CodingCoach",
+   "eager": false
+  },
+  "say": "What is recursion?",
+  "narrate": "The learner asks about a new concept. Watch the decider classify this as 'exploring' and redirect to a question rather than an explanation."
+ },
+ {
+  "start": 59.11462068557739,
+  "end": 102.90872097015381,
+  "out": {
+   "reply": "You've nailed the core idea! Let's zero in on that \"what stops it\" part\u2014it's actually a simple rule built right into your code.\n\nIn every recursive function, there is a **base case**: an unbreakable stop sign (usually an `=` or condition). It\u2019s like saying:  \n> \u201cKeep calling yourself *only if* you haven\u2019t reached this stopping point yet.\"\n\nFor factorials, the base case is simple: **\"If n equals 0, return 1 and STOP calling yourself.\"**  \n\nLet me walk you through how it unfolds when `factorial(3)` runs\u2014with this stop sign in place. Try asking yourself, *\"At what exact moment does the 'STOP' light finally turn green?\"*",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "demonstrating_understanding",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7035
+    }
+   ],
+   "model_id": "qwen3.5-4b",
+   "latency_ms": 34377,
+   "agent": "CodingCoach",
+   "eager": false
+  },
+  "say": "I think a function calls itself... but I'm not sure what stops it.",
+  "narrate": "The learner shows partial understanding. The decider sees 'attempting' and asks the tutor to probe the gap."
+ },
+ {
+  "start": 102.90872097015381,
+  "end": 141.38830828666687,
+  "out": {
+   "reply": "Great! You've started building the function definition. Let me help you complete it with both parts of recursion:\n\n**Question:** What two things do we need in your code?  \n1. A way to make the function call itself with a smaller version (progress step)  \n2. A stopping condition that returns a known answer (the emergency exit)\n\nCan you show me what you've written so far, and we'll add those missing pieces together?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "attempting",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7475
+    }
+   ],
+   "model_id": "qwen3.5-4b",
+   "latency_ms": 30657,
+   "agent": "CodingCoach",
+   "eager": false
+  },
+  "say": "def factorial(n):\n    return n * factorial(n)",
+  "narrate": "The learner shares code with no base case. The decider sees 'attempting' and the tutor checks the answer \u00e2\u20ac\u201d naming what is right first."
+ },
+ {
+  "start": 141.38830828666687,
+  "end": 167.91340494155884,
+  "out": {
+   "reply": "Wait a minute\u2014there's something off here! When you calculate `factorial(3)`, it multiplies 3 by... `factorial(3)` itself? That would just repeat the same call forever without ever changing the number or moving toward the base case. \n\nTry this: if we never subtract anything when calling, what happens when we try to compute `factorial(5)` with your current code? (Hint: look at how many calls get made before it tries to do anything.)",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "stuck",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 6863
+    }
+   ],
+   "model_id": "qwen3.5-4b",
+   "latency_ms": 56318,
+   "agent": "CodingCoach",
+   "eager": false
+  },
+  "say": "I still don't get why it needs a stopping point, just explain it please.",
+  "narrate": "After repeated attempts, the learner asks directly. The decider sees 'stuck' with needs_direct=yes and the tutor finally explains."
+ },
+ {
+  "start": 167.91340494155884,
+  "end": 203.5474500656128,
+  "out": {
+   "reply": "You're right to focus on the **stopping point**! Let me break it down like this:\n\nImagine you're solving a puzzle and every step requires you to ask yourself the same question with *one less piece of the puzzle*. Eventually\u2014you MUST reach a moment when you have no pieces left, because that's the only time you can actually answer. That moment is your **base case**.\n\n**Here's the key difference:**\n- \u274c Without stopping: `factorial(5)` \u2192 `factorial(5)` \u2192 `factorial(5)...` (never ends)\n- \u2705 With stopping: `factorial(5)` calls until it hits `n == 0` and stops there\n\n**Your question is spot on:** what stops the chain? The answer is built into the code itself\u2014a simple condition like `if n == 0:` that says \"Stop calling yourself here, return this answer instead.\"\n\nWould you like me to trace step-by-step exactly how it works out when we *do* include that stop sign installed?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "demonstrating_understanding",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 6788
+    }
+   ],
+   "model_id": "qwen3.5-4b",
+   "latency_ms": 52608,
+   "agent": "CodingCoach",
+   "eager": false
+  },
+  "say": "Oh! So the base case is like an emergency exit \u00e2\u20ac\u201d without it the function calls itself forever.",
+  "narrate": "The learner demonstrates understanding. The decider catches it and the tutor offers a challenge."
+ }
+]

@@ -1,0 +1,128 @@
+{
+ "pattern_tag": "#policy",
+ "agentcore_features": [],
+ "pattern_doc": "REUSABLE DECISION PATTERN: learner-state policy classification  (#policy)\n\nWhat it does\n    Before the coding tutor responds to a learner, Strands Decider 2B reads the conversation\n    and classifies the learner's current state:\n\n    - exploring: asking about a new concept they haven't tried yet\n    - attempting: actively working on a problem (sharing code or a partial answer)\n    - stuck: has tried and hit a wall \u00e2\u20ac\u201d explicitly says so or has made multiple failed attempts\n    - demonstrating_understanding: showing they understand \u00e2\u20ac\u201d correct reasoning or working code\n    - off_topic: not related to coding or the current learning session\n    - clarification_needed: too ambiguous to classify confidently\n\n    The classification drives the teaching action (ask_question, give_hint, explain_concept,\n    generate_challenge, check_answer, redirect, clarify). Low-confidence responses fall back to\n    a clarifying question rather than guessing wrong and either spoiling the answer or being\n    unhelpfully cryptic.\n\nTyped questions and options\n    `learning_state` (choice): six states, each with a one-line definition; see QUESTIONS.\n    `needs_direct_explanation` (noul): override \u00e2\u20ac\u201d has the learner explicitly asked for a direct\n    answer, or struggled so many times that withholding is no longer helpful?\n\nWiring\n    `LearnerStateClassifier` is called once at the start of `HackathonAgent.chat`, before the\n    Strands Agent runs. It returns a `TeachingDecision` that is injected into the system prompt\n    so the LLM knows exactly how to respond.\n\n        classifier = LearnerStateClassifier(decider)\n        td = classifier.classify(message, conversation_history, learner_state)\n        # td.teaching_action, td.learning_state, td.confident, td.decider_ms\n\nHow to reuse it\n    Copy this file, rewrite the six states for your domain (e.g. customer intent in a support\n    agent, risk level in a compliance checker), and adjust the action mapping in\n    `LearnerStateClassifier.decide()`. The threshold logic (confidence < LOW_CONF \u00e2\u2020\u2019 clarify)\n    stays the same.",
+ "questions_code": "QUESTIONS = {\n    \"learning_state\": Decider.choice(\n        \"What is the learner's current state in this message?\",\n        LEARNING_STATES,\n    ),\n    \"needs_direct_explanation\": Decider.noul(\n        \"Has the learner explicitly asked for a direct answer or explanation, or have they struggled with the same concept unsuccessfully multiple times?\",\n        {\n            \"true\": \"the learner said 'just tell me', 'explain it', 'I give up', or has made three or more failed attempts at the same concept\",\n            \"false\": \"the learner has not asked for a direct answer and has not exhausted their attempts\",\n        },\n    ),\n}",
+ "agent_md": "# CodingCoach \u00e2\u20ac\u201d Adaptive Socratic Coding Tutor\n\n- **Pitch:** an AI coding tutor that never dumps answers \u00e2\u20ac\u201d it reads where you are and asks, hints, or explains just enough.\n- **Who it is for:** developers learning to code who lose interest or feel like they're not retaining anything when a regular AI just explains everything.\n- **Features:**\n  - Socratic questioning: asks what you already know before explaining anything\n  - Adaptive hints: gives the smallest nudge that moves you forward\n  - Challenge generation: creates exercises at your current level\n  - Answer checking: tells you what's right before saying what's wrong\n  - Deployed on Amazon Bedrock AgentCore Runtime\n- **The decision handed to Strands Decider 2B:** before the agent responds, classify the learner's message into a learning state (`exploring`, `attempting`, `stuck`, `demonstrating_understanding`, `off_topic`, `clarification_needed`) and pick the right teaching action. (`#policy`)\n- **Why a decision model:** this classification runs on every single message \u00e2\u20ac\u201d it must be fast, cheap, and return a confidence the code can branch on (low confidence \u00e2\u2020\u2019 ask a clarifying question instead of guessing).\n- **Amazon Bedrock:** the conversation and tool use (Amazon Nova Pro by default).\n",
+ "llm_provider_local_runs": "ugmdu",
+ "agent_name": "CodingCoach",
+ "bench": {
+  "summary": {
+   "decider": {
+    "accuracy": 0.875,
+    "decisions": 24,
+    "per_question": {
+     "learning_state": 0.75,
+     "needs_direct_explanation": 1.0
+    },
+    "latency_p50_ms": 4914.5,
+    "latency_p95_ms": 5480.2,
+    "usd_per_1k_decisions": 0.035,
+    "confident_share": 0.4167,
+    "accuracy_when_confident": 1.0,
+    "sent_to_human_at_threshold": 14
+   },
+   "llm": {
+    "accuracy": 0.875,
+    "decisions": 24,
+    "per_question": {
+     "learning_state": 0.8333,
+     "needs_direct_explanation": 0.9167
+    },
+    "latency_p50_ms": 19974.6,
+    "latency_p95_ms": 20657.9,
+    "usd_per_1k_decisions": 0.0,
+    "confident_share": 0.9583,
+    "accuracy_when_confident": 0.8696,
+    "sent_to_human_at_threshold": 1
+   },
+   "speedup_p50": 4.06
+  },
+  "decider_model": "strands-decider-2b-hobson-v19",
+  "decider_mode": "ugmdu",
+  "llm_model": "qwen3.5-4b",
+  "cases": 12,
+  "split": "test",
+  "threshold": 0.7
+ },
+ "bench_table": "Decider: strands-decider-2b-hobson-v19 (ugmdu). 12 labelled cases, 24 decisions.\n\n| | Strands Decider 2B | qwen3.5-4b |\n|---|---|---|\n| Accuracy | 87.5% | 87.5% |\n| Latency p50 per decision | 4914 ms | 19975 ms |\n| Latency p95 | 5480 ms | 20658 ms |\n| Cost per 1,000 decisions | $0.0350 | $0.0000 |\n| Answered alone at confidence >= 0.7 | 42% | 96% |\n| Accuracy when confident | 100.0% | 87.0% |\n\nAt the median the decider was 4.1x faster than the LLM.\n",
+ "demo_turns": [
+  {
+   "user": "What is recursion?",
+   "reply": "Great question! **Recursion** is when a function calls itself, but with a simpler version of the problem each time. Think of it like Russian nesting dolls: you open one to find a smaller doll inside, until you reach the tiniest one that doesn't contain anything else.\n\nThe key rule you're learning is the **base case** - that very smallest doll that stops the whole chain from going on forever. In your factorial example, `if n == 0: return 1` is like opening the last tiny doll and saying \"Here's what we were looking for!\" - this gives us an answer so the computer knows when to stop calling itself endlessly.\n\nWould you like me to trace through exactly how `factorial(3)` unfolds with this emergency exit installed?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "exploring",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7333
+    }
+   ],
+   "latency_ms": 45623
+  },
+  {
+   "user": "I think a function calls itself... but I'm not sure what stops it.",
+   "reply": "You've nailed the core idea! Let's zero in on that \"what stops it\" part\u2014it's actually a simple rule built right into your code.\n\nIn every recursive function, there is a **base case**: an unbreakable stop sign (usually an `=` or condition). It\u2019s like saying:  \n> \u201cKeep calling yourself *only if* you haven\u2019t reached this stopping point yet.\"\n\nFor factorials, the base case is simple: **\"If n equals 0, return 1 and STOP calling yourself.\"**  \n\nLet me walk you through how it unfolds when `factorial(3)` runs\u2014with this stop sign in place. Try asking yourself, *\"At what exact moment does the 'STOP' light finally turn green?\"*",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "demonstrating_understanding",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7035
+    }
+   ],
+   "latency_ms": 34377
+  },
+  {
+   "user": "def factorial(n):\n    return n * factorial(n)",
+   "reply": "Great! You've started building the function definition. Let me help you complete it with both parts of recursion:\n\n**Question:** What two things do we need in your code?  \n1. A way to make the function call itself with a smaller version (progress step)  \n2. A stopping condition that returns a known answer (the emergency exit)\n\nCan you show me what you've written so far, and we'll add those missing pieces together?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "attempting",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 7475
+    }
+   ],
+   "latency_ms": 30657
+  },
+  {
+   "user": "I still don't get why it needs a stopping point, just explain it please.",
+   "reply": "Wait a minute\u2014there's something off here! When you calculate `factorial(3)`, it multiplies 3 by... `factorial(3)` itself? That would just repeat the same call forever without ever changing the number or moving toward the base case. \n\nTry this: if we never subtract anything when calling, what happens when we try to compute `factorial(5)` with your current code? (Hint: look at how many calls get made before it tries to do anything.)",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "stuck",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 6863
+    }
+   ],
+   "latency_ms": 56318
+  },
+  {
+   "user": "Oh! So the base case is like an emergency exit \u00e2\u20ac\u201d without it the function calls itself forever.",
+   "reply": "You're right to focus on the **stopping point**! Let me break it down like this:\n\nImagine you're solving a puzzle and every step requires you to ask yourself the same question with *one less piece of the puzzle*. Eventually\u2014you MUST reach a moment when you have no pieces left, because that's the only time you can actually answer. That moment is your **base case**.\n\n**Here's the key difference:**\n- \u274c Without stopping: `factorial(5)` \u2192 `factorial(5)` \u2192 `factorial(5)...` (never ends)\n- \u2705 With stopping: `factorial(5)` calls until it hits `n == 0` and stops there\n\n**Your question is spot on:** what stops the chain? The answer is built into the code itself\u2014a simple condition like `if n == 0:` that says \"Stop calling yourself here, return this answer instead.\"\n\nWould you like me to trace step-by-step exactly how it works out when we *do* include that stop sign installed?",
+   "decisions": [
+    {
+     "pattern": "#policy",
+     "learning_state": "demonstrating_understanding",
+     "teaching_action": "clarify",
+     "confident": false,
+     "needs_direct": false,
+     "decider_ms": 6788
+    }
+   ],
+   "latency_ms": 52608
+  }
+ ],
+ "repo_url": "",
+ "video_url": ""
+}
