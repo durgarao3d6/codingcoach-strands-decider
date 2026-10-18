@@ -2,7 +2,7 @@
 
 Submit before 23 October 2026, 11:59 p.m. PT on the hackathon page.
 
-- Repository: <./kit publish ... fills this in>
+- Repository: https://github.com/durgarao3d6/codingcoach-strands-decider
 - Video: https://youtu.be/xxqbTc-OnPg
 - Article: <paste the AWS Builder Center link after publishing submission/article/>
 - Tags: #strands-decider-2b #policy
